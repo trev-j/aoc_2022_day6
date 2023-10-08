@@ -17,17 +17,29 @@ fn main() {
     });
 
     let mut max_calories: usize = 0;
+    let mut max_three: Vec<usize> = vec![0,0,0];
     let mut current_calories: usize = 0;
 
     for line in calorie_list_contents.lines() {
         if line == "" {
-            if current_calories > max_calories {
-                max_calories = current_calories;
+            for i in (0..3).rev() {
+                // Shift max values in result array
+                if max_three[i] == 0 || max_three[i] < current_calories {
+                    for j in 0..i {
+                        max_three[j] = max_three[j + 1];
+                    }
+                    max_three[i] = current_calories;
+                    break;
+                }
             }
             current_calories = 0;
         } else {
             current_calories += line.parse::<usize>().unwrap();
         }
+    }
+
+    for calories in max_three {
+        max_calories += calories;
     }
 
     println!("Max calories held: {}", max_calories);
