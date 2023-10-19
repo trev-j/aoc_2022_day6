@@ -17,42 +17,32 @@ fn main() {
     });
 
     let mut total_score: u32 = 0;
-    const ROCK_VAL: u32 = 1;
-    const PAPER_VAL: u32 = 2;
-    const SCISSORS_VAL: u32 = 3;
+    const LOSS_OUTCOME: u32 = 1;
+    const TIE_OUTCOME: u32 = 2;
 
     for line in input_file_contents.lines() {
         let line_symbols = line.split(" ");
         let symbols_vec: Vec<&str> = line_symbols.collect();
         let opponent_play: u32 = played_type_value(symbols_vec[0]);
-        let my_play: u32 = played_type_value(symbols_vec[1]);
-        let mut round_outcome: RoundOutcome = RoundOutcome::Loss;
+        let mut my_play: u32 = opponent_play;
+        let target_outcome: u32 = played_type_value(symbols_vec[1]);
 
-        if(opponent_play == my_play) {
+        let mut round_outcome: RoundOutcome = RoundOutcome::Loss;
+        
+        if target_outcome == TIE_OUTCOME {
             round_outcome = RoundOutcome::Tie;
-        } else if (opponent_play == ROCK_VAL && my_play == PAPER_VAL) {
-            round_outcome = RoundOutcome::Win;
-        } else if (opponent_play == PAPER_VAL && my_play == SCISSORS_VAL) {
-            round_outcome = RoundOutcome::Win;
-        } else if (opponent_play == SCISSORS_VAL && my_play == ROCK_VAL) {
-            round_outcome = RoundOutcome::Win;
-        } else {
+        } else if target_outcome == LOSS_OUTCOME {
             round_outcome = RoundOutcome::Loss;
+            my_play = get_lose_move_value(&opponent_play);
+        } else {
+            round_outcome = RoundOutcome::Win;
+            my_play = get_win_move_value(&opponent_play);
         }
 
-        total_score += round_outcome_value(round_outcome) + my_play;
+        total_score += round_outcome_value(&round_outcome) + my_play;
     }
 
     println!("Total score: {}", total_score);
-}
-
-enum StrategySymbolKind {
-    A,
-    B,
-    C,
-    X,
-    Y,
-    Z,
 }
 
 enum RoundOutcome {
@@ -61,18 +51,7 @@ enum RoundOutcome {
     Loss,
 }
 
-fn symbol_win_value(symbol: StrategySymbolKind) -> u32 {
-    match symbol {
-        StrategySymbolKind::A => 1,
-        StrategySymbolKind::B => 2,
-        StrategySymbolKind::C => 3,
-        StrategySymbolKind::X => 1,
-        StrategySymbolKind::Y => 2,
-        StrategySymbolKind::Z => 3,
-    }
-}
-
-fn round_outcome_value(symbol: RoundOutcome) -> u32 {
+fn round_outcome_value(symbol: &RoundOutcome) -> u32 {
     match symbol {
         RoundOutcome::Win => 6,
         RoundOutcome::Tie => 3,
@@ -88,6 +67,24 @@ fn played_type_value(played_type: &str) -> u32 {
         "X" => 1,
         "Y" => 2,
         "Z" => 3,
+        &_ => 0,
+    }
+}
+
+fn get_win_move_value(opponent_move: &u32) -> u32 {
+    match opponent_move {
+        1 => 2,
+        2 => 3,
+        3 => 1,
+        &_ => 0,
+    }
+}
+
+fn get_lose_move_value(opponent_move: &u32) -> u32 {
+    match opponent_move {
+        1 => 3,
+        2 => 1,
+        3 => 2,
         &_ => 0,
     }
 }
