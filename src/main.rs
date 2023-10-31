@@ -16,76 +16,74 @@ fn main() {
         process::exit(1);
     });
 
-    let mut total_score: u32 = 0;
-    const LOSS_OUTCOME: u32 = 1;
-    const TIE_OUTCOME: u32 = 2;
+    // Starting crate stacks
+    //     [H]         [H]         [V]    
+    //     [V]         [V] [J]     [F] [F]
+    //     [S] [L]     [M] [B]     [L] [J]
+    //     [C] [N] [B] [W] [D]     [D] [M]
+    // [G] [L] [M] [S] [S] [C]     [T] [V]
+    // [P] [B] [B] [P] [Q] [S] [L] [H] [B]
+    // [N] [J] [D] [V] [C] [Q] [Q] [M] [P]
+    // [R] [T] [T] [R] [G] [W] [F] [W] [L]
+    //  1   2   3   4   5   6   7   8   9 
+
+    let mut crate_stacks: Vec<CrateStack> = vec![
+        CrateStack::new(vec!['R', 'N', 'P', 'G']),
+        CrateStack::new(vec!['T', 'J', 'B', 'L', 'C', 'S', 'V', 'H']),
+        CrateStack::new(vec!['T', 'D', 'B', 'M', 'N', 'L']),
+        CrateStack::new(vec!['R', 'V', 'P', 'S', 'B']),
+        CrateStack::new(vec!['G', 'C', 'Q', 'S', 'W', 'M', 'V', 'H']),
+        CrateStack::new(vec!['W', 'Q', 'S', 'C', 'D', 'B', 'J']),
+        CrateStack::new(vec!['F', 'Q', 'L']),
+        CrateStack::new(vec!['W', 'M', 'H', 'T', 'D', 'L', 'F', 'V']),
+        CrateStack::new(vec!['L', 'P', 'B', 'V', 'M', 'J', 'F']),
+    ];
 
     for line in input_file_contents.lines() {
-        let line_symbols = line.split(" ");
-        let symbols_vec: Vec<&str> = line_symbols.collect();
-        let opponent_play: u32 = played_type_value(symbols_vec[0]);
-        let mut my_play: u32 = opponent_play;
-        let target_outcome: u32 = played_type_value(symbols_vec[1]);
+        let instructions_line = line.split(" ");
+        let instructions_line_vec: Vec<&str> = instructions_line.collect();
+        let move_qty: usize = instructions_line_vec[1].parse::<usize>().unwrap();
+        let move_from: usize = instructions_line_vec[3].parse::<usize>().unwrap() - 1; // subtract one to get index in crate_stacks array
+        let move_to: usize = instructions_line_vec[5].parse::<usize>().unwrap() - 1;
 
-        let mut round_outcome: RoundOutcome = RoundOutcome::Loss;
-        
-        if target_outcome == TIE_OUTCOME {
-            round_outcome = RoundOutcome::Tie;
-        } else if target_outcome == LOSS_OUTCOME {
-            round_outcome = RoundOutcome::Loss;
-            my_play = get_lose_move_value(&opponent_play);
-        } else {
-            round_outcome = RoundOutcome::Win;
-            my_play = get_win_move_value(&opponent_play);
+        for n in 0..move_qty {
+            let moved_crate: char = crate_stacks[move_from].pop().unwrap();
+            crate_stacks[move_to].push(moved_crate);
         }
-
-        total_score += round_outcome_value(&round_outcome) + my_play;
     }
 
-    println!("Total score: {}", total_score);
-}
-
-enum RoundOutcome {
-    Win,
-    Tie,
-    Loss,
-}
-
-fn round_outcome_value(symbol: &RoundOutcome) -> u32 {
-    match symbol {
-        RoundOutcome::Win => 6,
-        RoundOutcome::Tie => 3,
-        RoundOutcome::Loss => 0,
+    let mut top_crates: &str = "";
+    for n in 0..crate_stacks.len() {
+        print!("{}", crate_stacks[n].pop().unwrap());
     }
 }
 
-fn played_type_value(played_type: &str) -> u32 {
-    match played_type {
-        "A" => 1,
-        "B" => 2,
-        "C" => 3,
-        "X" => 1,
-        "Y" => 2,
-        "Z" => 3,
-        &_ => 0,
-    }
+struct CrateStack {
+    crates: Vec<char>
 }
 
-fn get_win_move_value(opponent_move: &u32) -> u32 {
-    match opponent_move {
-        1 => 2,
-        2 => 3,
-        3 => 1,
-        &_ => 0,
-    }
-}
+impl CrateStack {
+    fn new(crates: Vec<char>) -> CrateStack {
 
-fn get_lose_move_value(opponent_move: &u32) -> u32 {
-    match opponent_move {
-        1 => 3,
-        2 => 1,
-        3 => 2,
-        &_ => 0,
+        CrateStack {
+            crates: crates
+        }
+    }
+
+    fn pop(&mut self) -> Option<char> {
+        self.crates.pop()
+    }
+
+    fn push(&mut self, value: char) {
+        self.crates.push(value);
+    }
+
+    fn top_crate(&self) -> Option<char> {
+        if (self.crates.len() < 1) {
+            return None;
+        } else {
+            return Some(self.crates[self.crates.len() - 1]);
+        }
     }
 }
 
