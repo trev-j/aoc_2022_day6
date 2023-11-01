@@ -46,15 +46,14 @@ fn main() {
         let move_from: usize = instructions_line_vec[3].parse::<usize>().unwrap() - 1; // subtract one to get index in crate_stacks array
         let move_to: usize = instructions_line_vec[5].parse::<usize>().unwrap() - 1;
 
-        for n in 0..move_qty {
-            let moved_crate: char = crate_stacks[move_from].pop().unwrap();
-            crate_stacks[move_to].push(moved_crate);
-        }
+        let start_stack_size: usize = crate_stacks[move_from].len();
+        let moved_crates: &mut Vec<char> = &mut crate_stacks[move_from].crates.split_off(start_stack_size - move_qty);
+
+        crate_stacks[move_to].append(moved_crates);
     }
 
-    let mut top_crates: &str = "";
     for n in 0..crate_stacks.len() {
-        print!("{}", crate_stacks[n].pop().unwrap());
+        print!("{}", crate_stacks[n].top_crate().unwrap());
     }
 }
 
@@ -78,8 +77,16 @@ impl CrateStack {
         self.crates.push(value);
     }
 
+    fn append(&mut self, stack: &mut Vec<char>) {
+        self.crates.append(stack);
+    }
+
+    fn len(&self) -> usize {
+        self.crates.len()
+    }
+
     fn top_crate(&self) -> Option<char> {
-        if (self.crates.len() < 1) {
+        if self.crates.len() < 1 {
             return None;
         } else {
             return Some(self.crates[self.crates.len() - 1]);
