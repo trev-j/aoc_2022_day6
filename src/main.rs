@@ -1,7 +1,9 @@
 use std::env;
 use std::process;
 use std::fs;
-use std::collections::HashMap;
+
+use aoc_2022_day6::find_marker_index;
+
 
 fn main() {
 
@@ -17,25 +19,9 @@ fn main() {
         process::exit(1);
     });
 
-    let mut start_index: usize = 0;
-    let mut character_map: HashMap<char, bool> = HashMap::new();
+    let start_index = find_marker_index(&input_file_contents, 14);
 
-    for (i, c) in input_file_contents.chars().enumerate() {
-        if character_map.contains_key(&c) {
-            character_map = HashMap::new(); // If character is already in map indicates repeat character and must restart map creation at current character
-            character_map.insert(c, true);
-        } else {
-            character_map.insert(c, true);
-        }
-
-        // If count of keys in map is length of 4, all characters must be unique, and current index is start of sequence
-        if character_map.keys().len() == 4 {
-            start_index = i;
-            break;
-        }
-    }
-
-    print!("Start index {}, {:?}", start_index, character_map.keys());
+    print!("\nStart index {}", start_index);
 }
 
 struct Config {
